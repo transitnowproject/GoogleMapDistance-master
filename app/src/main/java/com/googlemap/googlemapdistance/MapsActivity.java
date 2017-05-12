@@ -2,17 +2,22 @@ package com.googlemap.googlemapdistance;
 
 import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -41,6 +46,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,11 +84,13 @@ public class MapsActivity extends FragmentActivity implements
 
     //Google ApiClient
     private GoogleApiClient googleApiClient;
+    private LatLng latLng;
 
     //Our buttons
-    private Button buttonSetTo;
+    private Button buttonSetTo,btnExit,btnSearch;
     private Button buttonSetFrom;
     private Button buttonCalcDistance;
+    private EditText edtLocation;
 
 
     @Override
@@ -109,10 +117,16 @@ public class MapsActivity extends FragmentActivity implements
         buttonSetTo = (Button) findViewById(R.id.buttonSetTo);
         buttonSetFrom = (Button) findViewById(R.id.buttonSetFrom);
         buttonCalcDistance = (Button) findViewById(R.id.buttonCalcDistance);
+        btnExit= (Button) findViewById(R.id.btnExit);
+        btnSearch= (Button) findViewById(R.id.btnSearch);
+        edtLocation= (EditText) findViewById(R.id.edtLocation);
 
         buttonSetTo.setOnClickListener(this);
         buttonSetFrom.setOnClickListener(this);
         buttonCalcDistance.setOnClickListener(this);
+        btnExit.setOnClickListener(this);
+        btnSearch.setOnClickListener(this);
+
     }
 
     @Override
@@ -320,8 +334,8 @@ public class MapsActivity extends FragmentActivity implements
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng latlng = new LatLng(-34, 151);
+        // Add a marker in chd and move the camera
+        LatLng latlng = new LatLng(34, 76);
         mMap.addMarker(new MarkerOptions().position(latlng).draggable(true));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latlng));
         mMap.setOnMarkerDragListener(this);
@@ -356,6 +370,74 @@ public class MapsActivity extends FragmentActivity implements
             //This method will show the distance and will also draw the path
             getDirection();
         }
+        if(v == btnSearch){
+            searchLocation();
+        }
+        if( v == btnExit)
+        {
+            finish();
+            System.exit(0);
+        }
+    }
+    public void searchLocation()
+    {
+        mMap.clear();
+
+       final  String locationsearch = edtLocation.getText().toString();
+        //
+
+        Toast.makeText(getBaseContext(), locationsearch, Toast.LENGTH_LONG).show();
+        List<Address> adddressList = null;
+        if (locationsearch != null && !locationsearch.equals("")) {
+            Toast.makeText(getBaseContext(), "Location is not empty", Toast.LENGTH_LONG).show();
+            Geocoder geocoder = new Geocoder(MapsActivity.this);
+            try {
+                adddressList =
+                        geocoder.getFromLocationName(locationsearch, 1);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Address address = adddressList.get(0);
+            latLng = new LatLng(address.getLatitude(),
+                    address.getLongitude());
+            latitude = latLng.latitude;
+            longitude = latLng.longitude;
+            mMap.addMarker(new
+                    MarkerOptions().position(latLng).title(locationsearch));
+            mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+            //  mMap.animateCamera(CameraUpdateFactory.zoomTo(10));
+            mMap.setOnMapClickListener(new
+                                               GoogleMap.OnMapClickListener() {
+                                                   @Override
+                                                   public void onMapClick(LatLng latLng) {
+                                                       mMap.clear();
+                                                       mMap.addMarker(new
+                                                               MarkerOptions().position(latLng));
+
+                                                       mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                                                       mMap.animateCamera(CameraUpdateFactory.zoomTo(50));
+                                                   }
+
+                                               });
+//            mMap.setOnMarkerClickListener(new
+//                                                  GoogleMap.OnMarkerClickListener() {
+//                                                      @Override
+//                                                      public boolean onMarkerClick(Marker marker) {
+//                                                          Intent intent = new Intent(MapsActivity.this,
+//                                                                  LocationActivity.class);
+//
+//                                                          intent.putExtra("locationsearch", locationsearch);
+//                                                          intent.putExtra("latitude", latitude);
+//                                                          intent.putExtra("longitude", longitude);
+//                                                          startActivity(intent);
+//                                                          //currentmarker.remove();
+//                                                          return true;
+//                                                      }
+//                                                  });
+        } else {
+            Toast.makeText(getBaseContext(), "Please Enter Location", Toast.LENGTH_LONG).show();
+        }
+
     }
 
 
