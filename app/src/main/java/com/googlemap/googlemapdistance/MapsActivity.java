@@ -231,7 +231,7 @@ public class MapsActivity extends FragmentActivity implements
         String url = makeURL(fromLatitude, fromLongitude, toLatitude, toLongitude);
 
         //Showing a dialog till we get the route
-        final ProgressDialog loading = ProgressDialog.show(this, "Getting Route", "Please wait", false, false);
+        final ProgressDialog loading = ProgressDialog.show(this, "Calculating Distance", "Please wait", false, false);
 
         //Creating a string request
         StringRequest stringRequest = new StringRequest(url,
@@ -266,7 +266,7 @@ public class MapsActivity extends FragmentActivity implements
         Double distance = SphericalUtil.computeDistanceBetween(from, to);
 
         //Displaying the distance
-        Toast.makeText(this, String.valueOf(distance+"Meters"), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, String.valueOf(distance+"  Meters"), Toast.LENGTH_SHORT).show();
 
         try{
             //Parsing json
@@ -389,7 +389,7 @@ public class MapsActivity extends FragmentActivity implements
         Toast.makeText(getBaseContext(), locationsearch, Toast.LENGTH_LONG).show();
         List<Address> adddressList = null;
         if (locationsearch != null && !locationsearch.equals("")) {
-            Toast.makeText(getBaseContext(), "Location is not empty", Toast.LENGTH_LONG).show();
+            //Toast.makeText(getBaseContext(), "Location is not empty", Toast.LENGTH_LONG).show();
             Geocoder geocoder = new Geocoder(MapsActivity.this);
             try {
                 adddressList =
